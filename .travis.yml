@@ -1,0 +1,27 @@
+language: java
+jdk:
+  - openjdk14
+
+services:
+  - postgresql
+
+before_install:
+  - psql -c 'create database fullstack_auth;' -U postgres
+
+# используем режим обычного пользователя для сборки проекта.
+sudo: false
+
+install: true
+
+script: mvn clean package -DskipTests=true
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+# Отправлять уведомление на почтуyouremail@smtp.ru(Изменить на свою) если сборка упала
+notifications:
+  email:
+    recipients:
+      - azzzat72@yandex.ru
+    on_success: never # default: change
+    on_failure: always # default: always
