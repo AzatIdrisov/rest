@@ -16,5 +16,6 @@
 
     <modules>
         <module>auth</module>
+        <module>chat</module>
     </modules>
 </project>
