@@ -3,7 +3,9 @@ package ru.job4j.chat.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.domain.role.Role;
+import ru.job4j.chat.domain.user.User;
 import ru.job4j.chat.repository.RoleRepository;
 
 import java.util.List;
@@ -27,12 +29,11 @@ public class RoleController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Role> findById(@PathVariable int id) {
-        var role = rep.findById(id);
-        return new ResponseEntity<>(
-                role.orElse(new Role()),
-                role.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
-        );
+    public Role findById(@PathVariable int id) {
+        return rep.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Role is not found. Please, check id."
+                ));
     }
 
     @PostMapping("/")

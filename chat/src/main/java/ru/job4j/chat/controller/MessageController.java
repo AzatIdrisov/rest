@@ -5,9 +5,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.domain.message.Message;
 import ru.job4j.chat.domain.message.MessageResponseEntity;
 import ru.job4j.chat.domain.room.Room;
+import ru.job4j.chat.domain.user.User;
 import ru.job4j.chat.domain.user.UserResponseEntity;
 import ru.job4j.chat.repository.MessageRepository;
 
@@ -36,12 +38,11 @@ public class MessageController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MessageResponseEntity> findById(@PathVariable int id) {
-        var message = rep.findById(id);
-        return new ResponseEntity<>(
-                transformToResponseEntity(message.orElse(new Message())),
-                message.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
-        );
+    public Message findById(@PathVariable int id) {
+        return rep.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Message is not found. Please, check id."
+                ));
     }
 
     @GetMapping("/room/{id}")
