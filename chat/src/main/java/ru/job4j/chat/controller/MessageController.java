@@ -9,10 +9,10 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.domain.message.Message;
 import ru.job4j.chat.domain.message.MessageResponseEntity;
 import ru.job4j.chat.domain.room.Room;
-import ru.job4j.chat.domain.user.User;
 import ru.job4j.chat.domain.user.UserResponseEntity;
 import ru.job4j.chat.repository.MessageRepository;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -71,6 +71,18 @@ public class MessageController {
     public ResponseEntity<Void> delete(@PathVariable int id) {
         rep.deleteById(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/patch")
+    public Message patch(@RequestBody Message message) throws InvocationTargetException,
+            IllegalAccessException {
+        var currentMessage = rep.findById(message.getId());
+        if (!currentMessage.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        Patcher<Message> patcher = new Patcher();
+        rep.save(patcher.update(currentMessage.get(), message));
+        return currentMessage.get();
     }
 
     private MessageResponseEntity transformToResponseEntity(Message message) {

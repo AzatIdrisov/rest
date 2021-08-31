@@ -19,6 +19,7 @@ import ru.job4j.chat.repository.UserStore;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -89,6 +90,18 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/patch")
+    public User patch(@RequestBody User user) throws InvocationTargetException,
+            IllegalAccessException {
+        var currentUser = rep.findById(user.getId());
+        if (!currentUser.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        Patcher<User> patcher = new Patcher();
+        rep.save(patcher.update(currentUser.get(), user));
+        return currentUser.get();
+    }
+
     private String getRoleByRoleId(int roleId) {
         return Objects.requireNonNull(rest.exchange(
                 ROLE_API_ID,
@@ -108,17 +121,19 @@ public class UserController {
         );
     }
 
-    @ExceptionHandler(value = { IllegalArgumentException.class })
+    @ExceptionHandler(value = {IllegalArgumentException.class})
     public void exceptionHandler(Exception e,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
             throws IOException {
         response.setStatus(HttpStatus.BAD_REQUEST.value());
         response.setContentType("application/json");
-        response.getWriter().write(objectMapper.writeValueAsString(new HashMap<>() { {
-            put("message", e.getMessage());
-            put("type", e.getClass());
-        }}));
+        response.getWriter().write(objectMapper.writeValueAsString(new HashMap<>() {
+            {
+                put("message", e.getMessage());
+                put("type", e.getClass());
+            }
+        }));
         LOGGER.error(e.getLocalizedMessage());
     }
 }

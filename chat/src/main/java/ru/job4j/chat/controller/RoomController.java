@@ -7,6 +7,7 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.domain.room.Room;
 import ru.job4j.chat.repository.RoomRepository;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -53,5 +54,17 @@ public class RoomController {
     public ResponseEntity<Void> delete(@PathVariable int id) {
         rep.deleteById(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/patch")
+    public Room patch(@RequestBody Room room) throws InvocationTargetException,
+            IllegalAccessException {
+        var currentRoom = rep.findById(room.getId());
+        if (!currentRoom.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        Patcher<Room> patcher = new Patcher();
+        rep.save(patcher.update(currentRoom.get(), room));
+        return currentRoom.get();
     }
 }
