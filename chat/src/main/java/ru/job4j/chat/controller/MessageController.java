@@ -3,15 +3,18 @@ package ru.job4j.chat.controller;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
+import ru.job4j.chat.domain.Operation;
 import ru.job4j.chat.domain.message.Message;
 import ru.job4j.chat.domain.message.MessageResponseEntity;
 import ru.job4j.chat.domain.room.Room;
 import ru.job4j.chat.domain.user.UserResponseEntity;
 import ru.job4j.chat.repository.MessageRepository;
 
+import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedList;
 import java.util.List;
@@ -53,7 +56,8 @@ public class MessageController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Message> create(@RequestBody Message message) {
+    @Validated(Operation.OnCreate.class)
+    public ResponseEntity<Message> create(@Valid @RequestBody Message message) {
         message = rep.save(message);
         return new ResponseEntity<>(
                 message,
@@ -62,7 +66,7 @@ public class MessageController {
     }
 
     @PutMapping("/")
-    public ResponseEntity<Void> update(@RequestBody Message message) {
+    public ResponseEntity<Void> update(@Valid  @RequestBody Message message) {
         rep.save(message);
         return ResponseEntity.ok().build();
     }
@@ -74,7 +78,7 @@ public class MessageController {
     }
 
     @PatchMapping("/patch")
-    public Message patch(@RequestBody Message message) throws InvocationTargetException,
+    public Message patch(@Valid @RequestBody Message message) throws InvocationTargetException,
             IllegalAccessException {
         var currentMessage = rep.findById(message.getId());
         if (!currentMessage.isPresent()) {

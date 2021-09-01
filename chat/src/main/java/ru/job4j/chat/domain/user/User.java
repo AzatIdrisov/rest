@@ -1,15 +1,26 @@
 package ru.job4j.chat.domain.user;
 
+import ru.job4j.chat.domain.Operation;
+
 import javax.persistence.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @NotNull(message = "Id must be non null", groups = {
+            Operation.OnUpdate.class, Operation.OnDelete.class
+    })
     private int id;
+    @NotBlank(message  = "username must be not empty")
     private String username;
+    @NotBlank(message  = "password must be not empty")
     private String password;
+    @Min(value = 0, message = "Role id must be more than 0")
     private int roleId;
 
     public User() {

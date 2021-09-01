@@ -1,14 +1,24 @@
 package ru.job4j.chat.domain.message;
 
+import ru.job4j.chat.domain.Operation;
+
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Entity
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @NotNull(message = "Id must be non null", groups = {
+            Operation.OnUpdate.class, Operation.OnDelete.class
+    })
     private int id;
+    @NotBlank(message  = "Message must be not empty")
     private String message;
+    @NotNull(message = "User's Id must be non null")
     private int userId;
+    @NotNull(message = "Room's Id must be non null")
     private int roomId;
 
     public int getId() {

@@ -7,9 +7,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
+import ru.job4j.chat.domain.Operation;
 import ru.job4j.chat.domain.role.Role;
 import ru.job4j.chat.domain.user.User;
 import ru.job4j.chat.domain.user.UserResponseEntity;
@@ -18,11 +21,14 @@ import ru.job4j.chat.repository.UserStore;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
@@ -70,7 +76,8 @@ public class UserController {
     }*/
 
     @PostMapping("/sign-up")
-    public void signUp(@RequestBody User user) {
+    @Validated(Operation.OnCreate.class)
+    public void signUp(@Valid @RequestBody User user) {
         if (user.getPassword().length() < 6) {
             throw new IllegalArgumentException("Password length must be greater than 6");
         }
@@ -79,7 +86,7 @@ public class UserController {
     }
 
     @PutMapping("/")
-    public ResponseEntity<Void> update(@RequestBody User user) {
+    public ResponseEntity<Void> update(@Valid @RequestBody User user) {
         rep.save(user);
         return ResponseEntity.ok().build();
     }
@@ -91,7 +98,7 @@ public class UserController {
     }
 
     @PatchMapping("/patch")
-    public User patch(@RequestBody User user) throws InvocationTargetException,
+    public User patch(@Valid @RequestBody User user) throws InvocationTargetException,
             IllegalAccessException {
         var currentUser = rep.findById(user.getId());
         if (!currentUser.isPresent()) {
